@@ -1,11 +1,7 @@
-import React from 'react';
 
-function LoginPage() {
-  return (
-    <div>
-      <h1 className="text-black">Ini halaman login</h1>
-    </div>
-  );
+'use client';
+import LoginForm from '@/app/login/kontenlogin';
+
+export default function LoginPage() {
+  return <LoginForm />;
 }
-
-export default LoginPage;
