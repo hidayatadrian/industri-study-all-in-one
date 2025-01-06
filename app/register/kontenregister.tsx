@@ -5,7 +5,7 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import Alert from '@/components/ui/alert'
 interface RegisterFormProps {
-onSuccess?: () => void;
+    onSuccess?: () => void;
 }
 
 const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
@@ -16,25 +16,29 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
     const [showAlert, setShowAlert] = useState(false);
 
     const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    if (userCredential.user) {
-    onSuccess?.();
-    setShowAlert(true);
-    setTimeout(() => {
-    router.push('/login');
-    }, 2000);
-    }
-    } catch (error: any) {
-    setError(error.message);
-    }
+        e.preventDefault();
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            if (userCredential.user) {
+                onSuccess?.();
+                setShowAlert(true);
+                setTimeout(() => {
+                    router.push('/login');
+                }, 2000);
+            }
+        } catch (error: any) {
+            setError(error.message);
+        }
     };
 
+    const handleGoogleRegister = async  (e: React.FormEvent)  => {
+        e.preventDefault();
+    }
+
     return (
-    <div className="">
-        <Alert message="Successfully saved!" description="Anyone with a link can now view this file." show={showAlert}
-            onClose={()=> setShowAlert(false)}
+        <div className="">
+            <Alert message="Successfully registered!" description="Continue to login page in 3 seconds." show={showAlert}
+                onClose={() => setShowAlert(false)}
             />
             <div className="min-h-screen flex flex-col md:flex-row">
                 <div className="w-full md:w-1/2 p-6 md:p-12 flex flex-col justify-center">
@@ -66,9 +70,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
                                             className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                             <Mail className="h-5 w-5 text-gray-400" />
                                         </div>
-                                        <input type="email" value={email} onChange={(e)=> setEmail(e.target.value)}
-                                        placeholder="Enter your email"
-                                        className="block w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                                            placeholder="Enter your email"
+                                            className="block w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                                         />
                                     </div>
                                 </div>
@@ -80,10 +84,10 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
                                             className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                             <Lock className="h-5 w-5 text-gray-400" />
                                         </div>
-                                        <input type="password" value={password} onChange={(e)=>
-                                        setPassword(e.target.value)}
-                                        placeholder="Create a password"
-                                        className="block w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                        <input type="password" value={password} onChange={(e) =>
+                                            setPassword(e.target.value)}
+                                            placeholder="Create a password"
+                                            className="block w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                                         />
                                     </div>
                                 </div>
@@ -92,6 +96,23 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
                             <button type="submit"
                                 className="w-full px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                                 Create Account
+                            </button>
+
+                            <div className="relative">
+                                <div className="absolute inset-0 flex items-center">
+                                    <div className="w-full border-t border-gray-300"></div>
+                                </div>
+                                <div className="relative flex justify-center text-sm">
+                                    <span className="px-2 bg-white text-gray-500">Or</span>
+                                </div>
+                            </div>
+
+                            <button onClick={handleGoogleRegister}
+                                className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none">
+                                    {/* Google Icon SVG */}
+                                </svg>
+                                Sign up  with Google
                             </button>
                         </form>
 
@@ -109,9 +130,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
                     {/* Your existing illustration code */}
                 </div>
             </div>
-    </div>
+        </div>
 
     );
-    };
+};
 
-    export default RegisterForm;
+export default RegisterForm;
