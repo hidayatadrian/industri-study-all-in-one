@@ -29,7 +29,7 @@ const Home: React.FC = () => {
 
     const ChangePage = (label: string) => {
         if (label === "Forecasting") {
-            router.push('/forecast');
+            router.push('/dashboard/forecast');
         }
     };
 
