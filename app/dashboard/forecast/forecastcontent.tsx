@@ -1,77 +1,70 @@
 import React, { useState } from 'react';
-import { X, SlidersHorizontal, Share2, Calendar, ListPlus, Settings, Puzzle } from 'lucide-react';
-import ForecastSidebar from '@/components/ui/sidebarforecast'
-import ForecastResultsTable from './result/tableforecast';
+import { X } from 'lucide-react';
+import ForecastSidebar from '@/components/ui/sidebarforecast';
 import { useRouter } from 'next/navigation';
 
-interface PollOption {
-    emoji?: string;
-    text: string;
-}
 interface MonthOption {
     period: number;
     month: string;
     demand: string;
 }
+
 const PollCreationPage = () => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [selectedLanguage, setSelectedLanguage] = useState('Linear Regression');
-    const [selectedProblem, setSelectedProblem] = useState<string>("");
+    const [selectedProblem, setSelectedProblem] = useState<string>('Linear_Regression');
     const router = useRouter();
-    const [showResults, setShowResults] = useState(false);
+    const [monthOptions, setMonthOptions] = useState<MonthOption[]>([
+        { period: 1, month: '', demand: '' }
+    ]);
+
+    const isDropdownDisabled = selectedProblem !== 'Time_Series_Forecasting'; // Aktifkan jika Time Series Forecasting dipilih
+
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSelectedProblem(event.target.value);
+        setIsDropdownOpen(false); // Tutup dropdown jika ada perubahan tipe problem
     };
+
     const toggleDropdown = () => {
-        setIsDropdownOpen(!isDropdownOpen);
+        if (!isDropdownDisabled) {
+            setIsDropdownOpen(!isDropdownOpen);
+        }
     };
 
     const selectLanguage = (language: string) => {
         setSelectedLanguage(language);
         setIsDropdownOpen(false);
     };
-    const [options, setOptions] = useState<PollOption[]>([
-        { text: "" },
-    ]);
-    const [monthOptions, setMonthOptions] = useState<MonthOption[]>([
-        { period: 1, month: '', demand: '', }
-    ]);
+
     const handleSolve = () => {
-        // Validasi data
-        const isValid = monthOptions.every(option =>
-            option.month.trim() !== '' &&
-            option.demand.trim() !== ''
+        const isValid = monthOptions.every(
+            (option) => option.month.trim() !== '' && option.demand.trim() !== ''
         );
 
         if (isValid) {
-            // Simpan data ke localStorage sebelum navigasi
             localStorage.setItem('forecastData', JSON.stringify(monthOptions));
-            // Navigate ke halaman result
             router.push('/dashboard/forecast/result');
         } else {
             alert('Please fill in all month and demand values');
         }
     };
+
     const addMonth = () => {
         setMonthOptions([
             ...monthOptions,
-            {
-                period: monthOptions.length + 1,
-                month: '',
-                demand: '',
-
-            }
+            { period: monthOptions.length + 1, month: '', demand: '' }
         ]);
     };
+
     const removeMonth = (index: number) => {
-        const updatedOptions = monthOptions.filter((_, i) => i !== index)
+        const updatedOptions = monthOptions
+            .filter((_, i) => i !== index)
             .map((option, i) => ({ ...option, period: i + 1 }));
         setMonthOptions(updatedOptions);
     };
 
     return (
         <div className="min-h-screen bg-gray-50 p-2 md:p-4 flex justify-center items-start">
-
             <div className="bg-white rounded-2xl shadow-lg w-full max-w-4xl flex flex-col md:flex-row">
                 {/* Left Sidebar */}
                 <ForecastSidebar />
@@ -86,94 +79,119 @@ const PollCreationPage = () => {
                     </div>
 
                     <div className="space-y-4 md:space-y-6">
-                        <div className="relative">
-                            <div className="max-w-lg mx-auto">
-                                <fieldset className="mb-5">
-                                    <legend className="sr-only">Type of Problem</legend>
-
-                                    {/* Linear Regression */}
-                                    <div className="flex items-center mb-4">
-                                        <input
-                                            id="problem-option-1"
-                                            type="radio"
-                                            name="problem_type"
-                                            value="Linear_Regression"
-                                            className="h-4 w-4 border-gray-300 focus:ring-2 focus:ring-blue-300"
-                                            checked={selectedProblem === "Linear_Regression"}
-                                            onChange={handleChange}
-                                        />
-                                        <label
-                                            htmlFor="problem-option-1"
-                                            className="text-sm font-medium text-gray-900 ml-2 block"
-                                        >
-                                            Linear Regression
-                                        </label>
-                                    </div>
-
-                                    {/* Time Series Forecasting */}
-                                    <div className="flex items-center mb-4">
-                                        <input
-                                            id="problem-option-2"
-                                            type="radio"
-                                            name="problem_type"
-                                            value="Time_Series_Forecasting"
-                                            className="h-4 w-4 border-gray-300 focus:ring-2 focus:ring-blue-300"
-                                            checked={selectedProblem === "Time_Series_Forecasting"}
-                                            onChange={handleChange}
-                                        />
-                                        <label
-                                            htmlFor="problem-option-2"
-                                            className="text-sm font-medium text-gray-900 ml-2 block"
-                                        >
-                                            Time Series Forecasting
-                                        </label>
-                                    </div>
-                                </fieldset>
-                            </div>
-                            <h2 className="font-semibold mb-4 mx-auto">Type of Time Series Forecasting</h2>
-
-                            <div className="h-10 bg-white flex border border-gray-200 rounded items-center">
-
+                        {/* Radio Buttons */}
+                        <fieldset className="mb-5">
+                            <legend className="sr-only">Type of Problem</legend>
+                            <div className="flex items-center mb-4">
                                 <input
-                                    value={selectedLanguage}
-                                    className="px-4 appearance-none outline-none text-gray-800 w-full"
-                                    readOnly
+                                    id="problem-option-1"
+                                    type="radio"
+                                    name="problem_type"
+                                    value="Linear_Regression"
+                                    className="h-4 w-4 border-gray-300 focus:ring-2 focus:ring-blue-300"
+                                    checked={selectedProblem === 'Linear_Regression'}
+                                    onChange={handleChange}
                                 />
-                                <button
-                                    onClick={() => setSelectedLanguage('')}
-                                    className="cursor-pointer outline-none focus:outline-none transition-all text-gray-300 hover:text-gray-600"
+                                <label
+                                    htmlFor="problem-option-1"
+                                    className="text-sm font-medium text-gray-900 ml-2 block"
                                 >
-                                    <svg className="w-4 h-4 mx-2 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                                    </svg>
-                                </button>
-                                <button
-                                    onClick={toggleDropdown}
-                                    className="cursor-pointer outline-none focus:outline-none border-l border-gray-200 transition-all text-gray-300 hover:text-gray-600"
-                                >
-                                    <svg className="w-4 h-4 mx-2 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <polyline points="18 15 12 9 6 15"></polyline>
-                                    </svg>
-                                </button>
+                                    Linear Regression
+                                </label>
                             </div>
+                            <div className="flex items-center mb-4">
+                                <input
+                                    id="problem-option-2"
+                                    type="radio"
+                                    name="problem_type"
+                                    value="Time_Series_Forecasting"
+                                    className="h-4 w-4 border-gray-300 focus:ring-2 focus:ring-blue-300"
+                                    checked={selectedProblem === 'Time_Series_Forecasting'}
+                                    onChange={handleChange}
+                                />
+                                <label
+                                    htmlFor="problem-option-2"
+                                    className="text-sm font-medium text-gray-900 ml-2 block"
+                                >
+                                    Time Series Forecasting
+                                </label>
+                            </div>
+                        </fieldset>
 
-                            {isDropdownOpen && (
-                                <div className="absolute rounded shadow bg-white overflow-hidden flex flex-col w-full mt-1 border border-gray-200">
-                                    {['Single Exponential Smoothing', 'Winter Series'].map((language) => (
-                                        <div key={language} className="cursor-pointer group border-t first:border-t-0">
+                        {/* Dropdown */}
+                        <h2 className="font-semibold mb-4">Type of Time Series Forecasting</h2>
+                        <div className="h-10 bg-white flex border border-gray-200 rounded items-center">
+                            <input
+                                value={selectedLanguage}
+                                className="px-4 appearance-none outline-none text-gray-800 w-full"
+                                readOnly
+                            />
+                            <button
+                                onClick={() => setSelectedLanguage('')}
+                                className={`cursor-pointer outline-none focus:outline-none transition-all text-gray-300 hover:text-gray-600 ${
+                                    isDropdownDisabled ? 'cursor-not-allowed' : ''
+                                }`}
+                                disabled={isDropdownDisabled}
+                            >
+                                <svg
+                                    className="w-4 h-4 mx-2 fill-current"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                >
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+                            <button
+                                onClick={toggleDropdown}
+                                className={`cursor-pointer outline-none focus:outline-none border-l border-gray-200 transition-all text-gray-300 hover:text-gray-600 ${
+                                    isDropdownDisabled ? 'cursor-not-allowed' : ''
+                                }`}
+                                disabled={isDropdownDisabled}
+                            >
+                                <svg
+                                    className="w-4 h-4 mx-2 fill-current"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                >
+                                    <polyline points="18 15 12 9 6 15"></polyline>
+                                </svg>
+                            </button>
+                        </div>
+
+                        {isDropdownOpen && !isDropdownDisabled && (
+                            <div className="absolute rounded shadow bg-white overflow-hidden flex flex-col w-full mt-1 border border-gray-200">
+                                {['Single Exponential Smoothing', 'Winter Series'].map(
+                                    (language) => (
+                                        <div
+                                            key={language}
+                                            className="cursor-pointer group border-t first:border-t-0"
+                                        >
                                             <a
                                                 onClick={() => selectLanguage(language)}
-                                                className={`block p-2 border-transparent border-l-4 group-hover:border-blue-600 group-hover:bg-gray-100 ${selectedLanguage === language ? 'border-blue-600' : ''
-                                                    }`}
+                                                className={`block p-2 border-transparent border-l-4 group-hover:border-blue-600 group-hover:bg-gray-100 ${
+                                                    selectedLanguage === language
+                                                        ? 'border-blue-600'
+                                                        : ''
+                                                }`}
                                             >
                                                 {language}
                                             </a>
                                         </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
+                                    )
+                                )}
+                            </div>
+                        )}
+
+                        {/* Add Month Section */}
                         <div>
                             <p className="text-sm font-medium mb-3">Add Months (Period)</p>
                             <div className="space-y-3">
@@ -195,7 +213,7 @@ const PollCreationPage = () => {
                                         />
                                         <input
                                             type="number"
-                                            placeholder="Demand "
+                                            placeholder="Demand"
                                             className="w-1/3 p-3 border border-gray-200 rounded-lg"
                                             value={option.demand}
                                             onChange={(e) => {
@@ -204,7 +222,6 @@ const PollCreationPage = () => {
                                                 setMonthOptions(newOptions);
                                             }}
                                         />
-
                                         <button
                                             onClick={() => removeMonth(index)}
                                             className="text-gray-400 hover:text-gray-600"
@@ -223,17 +240,22 @@ const PollCreationPage = () => {
                         </div>
                     </div>
 
+                    {/* Buttons */}
                     <div className="flex justify-end space-x-3 mt-6">
-                        <button className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600" onClick={() => {
-                            setMonthOptions([{ period: 1, month: '', demand: '' }]);
-                            setShowResults(false);
-                        }}>
+                        <button
+                            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                            onClick={() => {
+                                setMonthOptions([{ period: 1, month: '', demand: '' }]);
+                            }}
+                        >
                             Reset
                         </button>
-                        <button className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600" onClick={() => handleSolve()}>
+                        <button
+                            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                            onClick={() => handleSolve()}
+                        >
                             Solve
                         </button>
-
                     </div>
                 </div>
             </div>

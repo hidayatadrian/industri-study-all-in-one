@@ -22,7 +22,7 @@ const Home: React.FC = () => {
         { label: "To-do", color: "bg-purple-500 hover:bg-purple-600", icon: CheckSquare },
         { label: "Knowledge", color: "bg-gray-500 hover:bg-gray-600", icon: BookOpen },
         { label: "Forecasting", color: "bg-orange-600 hover:bg-orange-700", icon: TrendingUp },
-        { label: "Dashboards", color: "bg-pink-600 hover:bg-pink-700", icon: LayoutDashboard },
+        { label: "Aggregat Requirement", color: "bg-pink-600 hover:bg-pink-700", icon: LayoutDashboard },
         { label: "Planning", color: "bg-green-400 hover:bg-green-500", icon: Target },
         { label: "Employees", color: "bg-yellow-400 hover:bg-yellow-500", icon: Users },
     ];
@@ -30,6 +30,9 @@ const Home: React.FC = () => {
     const ChangePage = (label: string) => {
         if (label === "Forecasting") {
             router.push('/dashboard/forecast');
+        }
+        if (label === "Aggregat Requirement") {
+            router.push('/dashboard/agregatrequirement');
         }
     };
 
