@@ -5,12 +5,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 interface ForecastColumn {
     id: number;
     name: string;
+    initialStock: number;
+    lot: number;
+    wsHours: number;
 }
 
 interface TableRow {
     month: string;
     forecasts: Record<string, number>;
     workDays: number;
+}
+
+interface TooltipProps {
+    text: string;
 }
 
 const ForecastTable = () => {
@@ -25,6 +32,10 @@ const ForecastTable = () => {
     const [forecastValue, setForecastValue] = useState('');
     const [selectedColumn, setSelectedColumn] = useState('');
 
+    // State for temporary values when adding a new column
+    const [newInitialStock, setNewInitialStock] = useState<number>(0);
+    const [newLot, setNewLot] = useState<number>(0);
+    const [newWsHours, setNewWsHours] = useState<number>(0);
 
     // variabel biaya
     const [biayaSubkontrak, setbiayaSubkontrak] = useState<number>(0);
@@ -38,10 +49,24 @@ const ForecastTable = () => {
     const [maxlostsale, setmaxlostsale] = useState<number>(0);
 
 
+
+    //tooltip
+    const [tooltipVisible, setTooltipVisible] = useState(false);
+    const [tooltipText, setTooltipText] = useState('');
+    const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
     const addColumn = () => {
         if (!newColumnName) return;
-        setColumns([...columns, { id: Date.now(), name: newColumnName }]);
+        setColumns([...columns, {
+            id: Date.now(),
+            name: newColumnName,
+            initialStock: newInitialStock,
+            lot: newLot,
+            wsHours: newWsHours
+        }]);
         setNewColumnName('');
+        setNewInitialStock(0);
+        setNewLot(0);
+        setNewWsHours(0);
     };
 
     const removeColumn = (id: number) => {
@@ -78,27 +103,73 @@ const ForecastTable = () => {
         }
         setForecastValue('');
     };
+    const handleMouseEnter = (event: React.MouseEvent<HTMLDivElement>, text: string) => {
+        setTooltipText(text);
+        setTooltipPosition({
+            top: event.clientY + 10, // Position below the cursor
+            left: event.clientX + 10,
+        });
+        setTooltipVisible(true);
+    };
+    const handleMouseLeave = () => {
+        setTooltipVisible(false);
+    };
+    const Tooltip: React.FC<TooltipProps> = ({ text }) => (
+        <div className="absolute bg-white border border-gray-300 rounded shadow-lg p-2 z-10">
+            {text}
+        </div>
+    );
 
     return (
         <div className="max-w-6xl mx-auto p-4 space-y-6">
             <div className="grid grid-cols-2 gap-4">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Column Management</CardTitle>
+                        <div className=""
+                            onMouseLeave={handleMouseLeave}
+                            onMouseEnter={(e) => handleMouseEnter(e, 'Kolom yang digunakan untuk menentukan jenis peramalan')}
+                        >
+                            <CardTitle>Column Management</CardTitle>
+                        </div>
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-4">
-                            <div className="flex space-x-2">
+                            <div className="space-y-2">
+                                <label className="block text-sm font-medium mb-1">Masukkan kolom data peramalan</label>
                                 <input
                                     type="text"
                                     value={newColumnName}
                                     onChange={(e) => setNewColumnName(e.target.value)}
                                     placeholder="Enter column name"
-                                    className="flex-1 p-2 border rounded"
+                                    className="w-full p-2 border rounded"
+                                />
+                                <label className="block text-sm font-medium mb-1">Persediaan Awal (Unit) </label>
+                                <input
+                                    type="number"
+                                    value={newInitialStock}
+                                    onChange={(e) => setNewInitialStock(Number(e.target.value))}
+                                    placeholder="Initial Stock"
+                                    className="w-full p-2 border rounded"
+                                />
+                                <label className="block text-sm font-medium mb-1">Lot (Unit) </label>
+                                <input
+                                    type="number"
+                                    value={newLot}
+                                    onChange={(e) => setNewLot(Number(e.target.value))}
+                                    placeholder="Lot"
+                                    className="w-full p-2 border rounded"
+                                />
+                                <label className="block text-sm font-medium mb-1">Ws (jam / unit) </label>
+                                <input
+                                    type="number"
+                                    value={newWsHours}
+                                    onChange={(e) => setNewWsHours(Number(e.target.value))}
+                                    placeholder="Ws Hours"
+                                    className="w-full p-2 border rounded"
                                 />
                                 <button
                                     onClick={addColumn}
-                                    className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                                    className="w-full bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
                                 >
                                     Add Column
                                 </button>
@@ -122,7 +193,12 @@ const ForecastTable = () => {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Data Entry</CardTitle>
+                        <div className=""
+                            onMouseLeave={handleMouseLeave}
+                            onMouseEnter={(e) => handleMouseEnter(e, 'Data yang digunakan untuk proses perhitungan agregasi')}
+                        >
+                            <CardTitle>Data Entry</CardTitle>
+                        </div>
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-4">
@@ -175,52 +251,21 @@ const ForecastTable = () => {
                         </div>
                     </CardContent>
                 </Card>
-                {/* ini adalah card initial stock, lot, ws */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Additional Settings</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Initial Stock (unit)</label>
-                                <input
-                                    type="number"
-                                    value={initialStock}
-                                    onChange={(e) => setInitialStock(Number(e.target.value) || 0)}
-                                    className="w-full p-2 border rounded"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Lot (unit/unit)</label>
-                                <input
-                                    type="number"
-                                    value={lot}
-                                    onChange={(e) => setLot(Number(e.target.value) || 0)}
-                                    className="w-full p-2 border rounded"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Ws (jam/unit)</label>
-                                <input
-                                    type="number"
-                                    value={wsHours}
-                                    onChange={(e) => setWsHours(Number(e.target.value) || 0)}
-                                    className="w-full p-2 border rounded"
-                                />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
                 {/* ini adalah card biaya                         */}
-                <Card>
+                <Card className="w-full">
                     <CardHeader>
-                        <CardTitle>Additional Settings</CardTitle>
+                        <div
+                            className=""
+                            onMouseLeave={handleMouseLeave}
+                            onMouseEnter={(e) => handleMouseEnter(e, 'Data yang digunakan untuk proses perhitungan biaya')}
+                        >
+                            <CardTitle>Data Biaya</CardTitle>
+                        </div>
                     </CardHeader>
                     <CardContent>
-                        <div className="space-y-4">
+                        <div className="grid grid-cols-3 gap-4">
                             <div>
-                                <label className="block text-sm font-medium mb-1">Biaya SubKontrak (Rp) </label>
+                                <label className="block text-sm font-medium mb-1">Biaya SubKontrak (Rp)</label>
                                 <input
                                     type="number"
                                     value={biayaSubkontrak}
@@ -256,7 +301,7 @@ const ForecastTable = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium mb-1">Biaya FIring (Rp)</label>
+                                <label className="block text-sm font-medium mb-1">Biaya Firing (Rp)</label>
                                 <input
                                     type="number"
                                     value={biayaFiring}
@@ -274,7 +319,7 @@ const ForecastTable = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium mb-1">Umur daerah (Rp)</label>
+                                <label className="block text-sm font-medium mb-1">UMR (Rp)</label>
                                 <input
                                     type="number"
                                     value={umr}
@@ -283,7 +328,7 @@ const ForecastTable = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium mb-1">Kapasitas SubKontrak </label>
+                                <label className="block text-sm font-medium mb-1">Kapasitas SubKontrak</label>
                                 <input
                                     type="number"
                                     value={kapasitassubkontrak}
@@ -292,7 +337,7 @@ const ForecastTable = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium mb-1">max LostSale </label>
+                                <label className="block text-sm font-medium mb-1">Max LostSale</label>
                                 <input
                                     type="number"
                                     value={maxlostsale}
@@ -308,7 +353,7 @@ const ForecastTable = () => {
             <Card>
                 <CardContent className="pt-6">
                     <div className="overflow-x-auto">
-                        <table className="w-full border-collapse border border-gray-300">
+                        <table className="mt-5 w-full border-collapse border border-gray-300">
                             <thead>
                                 <tr>
                                     <th className="border border-gray-300 p-2">Bulan</th>
@@ -320,6 +365,8 @@ const ForecastTable = () => {
                                     <th className="border border-gray-300 p-2">Jumlah Hari Kerja</th>
                                 </tr>
                             </thead>
+
+                            {/* body table */}
                             <tbody>
                                 {tableData.map((row, rowIndex) => (
                                     <tr key={rowIndex}>
@@ -332,23 +379,34 @@ const ForecastTable = () => {
                                         <td className="border border-gray-300 p-2 text-center">{row.workDays}</td>
                                     </tr>
                                 ))}
+
+
                                 <tr className="bg-yellow-50">
                                     <td className="border border-gray-300 p-2">persediaan awal (unit)</td>
-                                    <td colSpan={columns.length + 1} className="border border-gray-300 p-2 text-center">
-                                        {initialStock}
-                                    </td>
+                                    {columns.map(column => (
+                                        <td key={column.id} className="border border-gray-300 p-2 text-center">
+                                            {column.initialStock}
+                                        </td>
+                                    ))}
+                                    <td className="border border-gray-300 p-2"></td>
                                 </tr>
                                 <tr className="bg-yellow-50">
                                     <td className="border border-gray-300 p-2">Lot (unit/unit)</td>
-                                    <td colSpan={columns.length + 1} className="border border-gray-300 p-2 text-center">
-                                        {lot}
-                                    </td>
+                                    {columns.map(column => (
+                                        <td key={column.id} className="border border-gray-300 p-2 text-center">
+                                            {column.lot}
+                                        </td>
+                                    ))}
+                                    <td className="border border-gray-300 p-2"></td>
                                 </tr>
                                 <tr className="bg-yellow-50">
                                     <td className="border border-gray-300 p-2">Ws (jam/unit)</td>
-                                    <td colSpan={columns.length + 1} className="border border-gray-300 p-2 text-center">
-                                        {wsHours}
-                                    </td>
+                                    {columns.map(column => (
+                                        <td key={column.id} className="border border-gray-300 p-2 text-center">
+                                            {column.wsHours}
+                                        </td>
+                                    ))}
+                                    <td className="border border-gray-300 p-2"></td>
                                 </tr>
                             </tbody>
                         </table>
