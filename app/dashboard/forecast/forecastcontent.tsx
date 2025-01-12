@@ -8,6 +8,9 @@ interface MonthOption {
     month: string;
     demand: string;
 }
+interface Peramalan {
+    targetforecast:number;
+}
 
 const PollCreationPage = () => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -17,6 +20,17 @@ const PollCreationPage = () => {
     const [monthOptions, setMonthOptions] = useState<MonthOption[]>([
         { period: 1, month: '', demand: '' }
     ]);
+
+    const [forecastperiod, setforecastperiod]=useState<Peramalan>({
+        targetforecast: 0
+    });
+    const handletargetperamalan = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = parseInt(e.target.value) || 0;
+        setforecastperiod({
+            ...forecastperiod,
+            targetforecast: value
+        });
+    };
 
     const isDropdownDisabled = selectedProblem !== 'Time_Series_Forecasting'; // Aktifkan jika Time Series Forecasting dipilih
 
@@ -239,7 +253,19 @@ const PollCreationPage = () => {
                             </div>
                         </div>
                     </div>
+                    {/* Inputan target forecast */}
+                    <p className="text-lg font-medium mb-3 mt-5">Jumlah Periode yang akan dilakukan peramalan</p>
+                    <div className="">
+                    <input
+                                            type="number"
+                                            placeholder="Target Periode"
+                                            className="w-1/3 p-3 border border-gray-200 rounded-lg"
+                                            value={forecastperiod.targetforecast}
+                                            onChange={handletargetperamalan}
+                                            min={1}
+                                        />
 
+                    </div>
                     {/* Buttons */}
                     <div className="flex justify-end space-x-3 mt-6">
                         <button

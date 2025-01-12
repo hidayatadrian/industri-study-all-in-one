@@ -1,6 +1,7 @@
 import React from 'react';
 import { Table } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import { LineChart } from '@/app/dashboard/forecast/result/linechart';
 interface ForecastResult {
     period: number;
     month: string;
@@ -103,11 +104,12 @@ const ForecastResultsTable: React.FC<ForecastTableProps> = ({ monthOptions }) =>
             const absEt = Math.abs(et); // Absolute Error
             const ape = dt !== 0 ? (absEt / dt) * 100 : 0; // APE (Avoid divide by zero)
             const rsfe = et; // Cumulative error (RSFE)
-            const mad = absEt; // Mean Absolute Deviation (MAD)
+            const mad = absEt / t; // Mean Absolute Deviation (MAD)
             const bka = totalPeriod// Upper control bound
             const bkb = -totalPeriod; // Lower control bound
             const AverageApe = ape / totalPeriod;
-
+            const ts = rsfe / mad;
+            console.log("Nilai TS", ts)
             return {
                 period: option.period,
                 month: option.month,
@@ -120,7 +122,7 @@ const ForecastResultsTable: React.FC<ForecastTableProps> = ({ monthOptions }) =>
                 rsfe,
                 mad,
                 ape,
-                ts: rsfe / (mad || 1), // Tracking signal (Avoid divide by zero)
+                ts, // Tracking signal (Avoid divide by zero)
                 bka,
                 bkb,
             };
@@ -257,9 +259,21 @@ const ForecastResultsTable: React.FC<ForecastTableProps> = ({ monthOptions }) =>
                         </tr>
 
                     </tfoot>
-                </table>
 
+                </table>
+                {/* Hasil perhitungan forecast */}
+                <tbody className="bg-white divide-y divide-gray-200">
+                    {results.map((result, rowIndex) => (
+                        <tr key={result.period} className={rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                            
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{result.ft.toFixed(5)}</td>
+                        </tr>
+
+                    ))}
+                </tbody>
             </div>
+
+
 
             <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-white p-4 rounded-lg shadow">
@@ -280,6 +294,11 @@ const ForecastResultsTable: React.FC<ForecastTableProps> = ({ monthOptions }) =>
                         {AverageApe}
                     </p>
                 </div>
+            </div>
+
+            {/* result grafik */}
+            <div className="mx-auto flex justify-center mt-5" style={{ width: '800px', height: '500px' }}>
+                <LineChart chartData={results} />
             </div>
         </div>
     );

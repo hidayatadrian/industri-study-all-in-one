@@ -23,7 +23,7 @@ const Home: React.FC = () => {
         { label: "Knowledge", color: "bg-gray-500 hover:bg-gray-600", icon: BookOpen },
         { label: "Forecasting", color: "bg-orange-600 hover:bg-orange-700", icon: TrendingUp },
         { label: "Aggregat Requirement", color: "bg-pink-600 hover:bg-pink-700", icon: LayoutDashboard },
-        { label: "Planning", color: "bg-green-400 hover:bg-green-500", icon: Target },
+        { label: "Material Requirement Planning", color: "bg-green-400 hover:bg-green-500", icon: Target },
         { label: "Employees", color: "bg-yellow-400 hover:bg-yellow-500", icon: Users },
     ];
 
@@ -33,6 +33,9 @@ const Home: React.FC = () => {
         }
         if (label === "Aggregat Requirement") {
             router.push('/dashboard/agregatrequirement');
+        }
+        if (label === "Material Requirement Planning") {
+            router.push('/dashboard/MRP');
         }
     };
 
