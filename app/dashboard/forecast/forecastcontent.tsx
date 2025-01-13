@@ -54,9 +54,16 @@ const PollCreationPage = () => {
         const isValid = monthOptions.every(
             (option) => option.month.trim() !== '' && option.demand.trim() !== ''
         );
-
+    
         if (isValid) {
-            localStorage.setItem('forecastData', JSON.stringify(monthOptions));
+            // Membuat objek yang berisi kedua data
+            const combinedData = {
+                monthData: monthOptions,
+                targetPeriod: forecastperiod.targetforecast
+            };
+    
+            // Menyimpan data gabungan ke localStorage
+            localStorage.setItem('forecastData', JSON.stringify(combinedData));
             router.push('/dashboard/forecast/result');
         } else {
             alert('Please fill in all month and demand values');
