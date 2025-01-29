@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { X, Plus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
+import { SendHorizontal, RotateCcw } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 interface ForecastColumn {
     id: number;
     name: string;
@@ -20,17 +21,26 @@ interface TooltipProps {
     text: string;
 }
 
-const ForecastTable = () => {
+interface datakerja{
+    jamkerja:number;
+    tenagakerja:number;
+}
+
+const AgregateTable = () => {
     const [columns, setColumns] = useState<ForecastColumn[]>([]);
     const [newColumnName, setNewColumnName] = useState('');
     const [selectedMonth, setSelectedMonth] = useState('');
     const [workDays, setWorkDays] = useState('');
     const [tableData, setTableData] = useState<TableRow[]>([]);
-    const [initialStock, setInitialStock] = useState<number>(0);
-    const [lot, setLot] = useState<number>(0);
-    const [wsHours, setWsHours] = useState<number>(0);
+    const [initialStock, setInitialStock] = useState<number>();
+    const [lot, setLot] = useState<number>();
+    const [wsHours, setWsHours] = useState<number>();
     const [forecastValue, setForecastValue] = useState('');
     const [selectedColumn, setSelectedColumn] = useState('');
+
+    // Data Pekerja
+    const [tenagakerja, settenagakerja] = useState<number>();
+    const [jamkerja, setjamkerja] = useState<number>();
 
     // State for temporary values when adding a new column
     const [newInitialStock, setNewInitialStock] = useState<number>(0);
@@ -54,6 +64,7 @@ const ForecastTable = () => {
     const [tooltipVisible, setTooltipVisible] = useState(false);
     const [tooltipText, setTooltipText] = useState('');
     const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
+    const router = useRouter();
     const addColumn = () => {
         if (!newColumnName) return;
         setColumns([...columns, {
@@ -114,6 +125,48 @@ const ForecastTable = () => {
     const handleMouseLeave = () => {
         setTooltipVisible(false);
     };
+
+    const pushData = () => {
+
+        const combinedData = {
+            // Column data with their properties
+            columns: columns.map(column => ({
+                id: column.id,
+                name: column.name,
+                initialStock: column.initialStock,
+                wsHours: column.wsHours,
+                lot: column.lot
+            })),
+
+            // Table data with forecasts and work days
+            tableData: tableData.map(row => ({
+                month: row.month,
+                forecasts: row.forecasts,
+                workDays: row.workDays
+            })),
+
+            // Cost data
+            costs: {
+                biayaSubkontrak,
+                biayaLostsale,
+                biayaTKOvertime,
+                biayaHiring,
+                biayaFiring,
+                biayasimpan,
+                umr,
+                kapasitassubkontrak,
+                maxlostsale
+            },
+            datakerja: {
+                tenagakerja,
+                jamkerja,
+            }
+        }
+        localStorage.setItem('agregatData', JSON.stringify(combinedData));
+        console.log(combinedData);
+        router.push('/dashboard/agregatrequirement/result');
+    }
+
     const Tooltip: React.FC<TooltipProps> = ({ text }) => (
         <div className="absolute bg-white border border-gray-300 rounded shadow-lg p-2 z-10">
             {text}
@@ -149,14 +202,6 @@ const ForecastTable = () => {
                                     value={newInitialStock}
                                     onChange={(e) => setNewInitialStock(Number(e.target.value))}
                                     placeholder="Initial Stock"
-                                    className="w-full p-2 border rounded"
-                                />
-                                <label className="block text-sm font-medium mb-1">Lot (Unit) </label>
-                                <input
-                                    type="number"
-                                    value={newLot}
-                                    onChange={(e) => setNewLot(Number(e.target.value))}
-                                    placeholder="Lot"
                                     className="w-full p-2 border rounded"
                                 />
                                 <label className="block text-sm font-medium mb-1">Ws (jam / unit) </label>
@@ -202,6 +247,8 @@ const ForecastTable = () => {
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-4">
+                            <div className="flex justify-end">
+                            </div>
                             <div>
                                 <label className="block text-sm font-medium mb-1">Month</label>
                                 <input
@@ -251,7 +298,7 @@ const ForecastTable = () => {
                         </div>
                     </CardContent>
                 </Card>
-                {/* ini adalah card biaya                         */}
+                {/* ini adalah card biaya   */}
                 <Card className="w-full">
                     <CardHeader>
                         <div
@@ -263,6 +310,7 @@ const ForecastTable = () => {
                         </div>
                     </CardHeader>
                     <CardContent>
+
                         <div className="grid grid-cols-3 gap-4">
                             <div>
                                 <label className="block text-sm font-medium mb-1">Biaya SubKontrak (Rp)</label>
@@ -348,10 +396,60 @@ const ForecastTable = () => {
                         </div>
                     </CardContent>
                 </Card>
+                <Card className="w-full">
+                    <CardHeader>
+                        <div
+                            className=""
+                            onMouseLeave={handleMouseLeave}
+                            onMouseEnter={(e) => handleMouseEnter(e, 'Data yang digunakan untuk proses perhitungan biaya')}
+                        >
+                            <CardTitle>Data Pekerja</CardTitle>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+
+                        <div className="grid grid-cols-3 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Tenaga Kerja Awal</label>
+                                <input
+                                    type="number"
+                                    value={tenagakerja}
+                                    onChange={(e) => settenagakerja(Number(e.target.value) || 0)}
+                                    className="w-full p-2 border rounded"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Jam Kerja</label>
+                                <input
+                                    type="number"
+                                    value={jamkerja}
+                                    onChange={(e) => setjamkerja(Number(e.target.value) || 0)}
+                                    className="w-full p-2 border rounded"
+                                />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
 
             <Card>
                 <CardContent className="pt-6">
+                    <div className="flex justify-end">
+                        <button className="rounded-md bg-red-600 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-red-700 focus:shadow-none active:bg-red-700 hover:bg-red-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2" type="button">
+                            <div className="flex items-center justify-center gap-2">
+                                <RotateCcw className="w-4 h-4" />
+                                <span>Reset</span>
+                            </div>
+                        </button>
+                        <button
+                            onClick={pushData}
+                            className="rounded-md bg-green-600 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-green-700 focus:shadow-none active:bg-green-700 hover:bg-green-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2" type="button">
+                            <div className="flex items-center justify-center gap-2">
+                                <SendHorizontal className="w-4 h-4" />
+                                <span>Solve</span>
+                            </div>
+                        </button>
+                    </div>
                     <div className="overflow-x-auto">
                         <table className="mt-5 w-full border-collapse border border-gray-300">
                             <thead>
@@ -390,15 +488,7 @@ const ForecastTable = () => {
                                     ))}
                                     <td className="border border-gray-300 p-2"></td>
                                 </tr>
-                                <tr className="bg-yellow-50">
-                                    <td className="border border-gray-300 p-2">Lot (unit/unit)</td>
-                                    {columns.map(column => (
-                                        <td key={column.id} className="border border-gray-300 p-2 text-center">
-                                            {column.lot}
-                                        </td>
-                                    ))}
-                                    <td className="border border-gray-300 p-2"></td>
-                                </tr>
+
                                 <tr className="bg-yellow-50">
                                     <td className="border border-gray-300 p-2">Ws (jam/unit)</td>
                                     {columns.map(column => (
@@ -417,4 +507,4 @@ const ForecastTable = () => {
     );
 };
 
-export default ForecastTable;
+export default AgregateTable;
