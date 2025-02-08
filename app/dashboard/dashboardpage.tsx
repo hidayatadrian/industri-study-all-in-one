@@ -24,7 +24,7 @@ const Home: React.FC = () => {
         { label: "Forecasting", color: "bg-orange-600 hover:bg-orange-700", icon: TrendingUp },
         { label: "Aggregat Requirement", color: "bg-pink-600 hover:bg-pink-700", icon: LayoutDashboard },
         { label: "Material Requirement Planning", color: "bg-green-400 hover:bg-green-500", icon: Target },
-        { label: "Employees", color: "bg-yellow-400 hover:bg-yellow-500", icon: Users },
+        { label: "Perencanaan Kapasitas", color: "bg-yellow-400 hover:bg-yellow-500", icon: Users },
     ];
 
     const ChangePage = (label: string) => {

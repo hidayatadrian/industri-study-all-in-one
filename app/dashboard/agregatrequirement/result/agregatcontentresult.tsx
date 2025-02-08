@@ -6,6 +6,7 @@ interface SavedDataType {
     columns: { name: string }[];
     costs: {
         biayaHiring: number;
+        biayaFiring:number;
         biayaLostsale: number;
         biayaSubkontrak: number;
         biayaTKOvertime: number;
@@ -25,7 +26,7 @@ interface SavedDataType {
     }[];
 }
 
-const AgregateResult = () => {
+const AgregateResultPure = () => {
     const [savedData, setSavedData] = useState<SavedDataType | null>(null);
     const [columns, setColumns] = useState<string[]>([]);
     const [totals, setTotals] = useState<number[]>([]);
@@ -52,7 +53,6 @@ const AgregateResult = () => {
         try {
             if (data) {
                 setSavedData(data);
-
                 const datakolom = Array.isArray(data.columns)
                     ? data.columns.map((column) => column.name)
                     : [];
@@ -181,7 +181,7 @@ const AgregateResult = () => {
             ["Bulan", "Biaya TK Reguler", "Biaya Hiring", "Biaya Simpan", "Total Biaya"],
             ...savedData.tableData.map((row, index) => {
                 const biayaTKReguler = savedData.costs
-                    ? (Math.ceil(savedData.costs.umr / (8 * 25))) * (jumlahProduksibaru[index] || 0)
+                    ? (Math.ceil(savedData.costs.umr / (savedData.datakerja.jamkerja * row.workDays))) * (jumlahProduksibaru[index] || 0)
                     : 0;
                 const biayaHiring = savedData.costs.biayaHiring;
                 const biayaSimpan = savedData.costs.biayasimpan * (persediaanbaru[index] || 0);
@@ -227,10 +227,11 @@ const AgregateResult = () => {
             console.error("Error exporting to Excel:", error);
         }
     };
+
+
+    
     return (
         <div className="max-w-6xl mx-auto p-4 space-y-6">
-
-
             {/* Keep the first two cards exactly as they were */}
             <Card className="shadow-lg">
                 <Card className="shadow-lg">
@@ -435,7 +436,7 @@ const AgregateResult = () => {
                                             savedData.tableData.map((row, index) => {
                                                 // Pastikan costs tersedia sebelum menghitung biaya TK Reguler
                                                 const biayaTKReguler = savedData.costs
-                                                    ? (Math.ceil(savedData.costs.umr / (8 * 25))) * (jumlahProduksibaru[index] || 0)
+                                                    ? (Math.ceil(savedData.costs.umr / (savedData.datakerja.jamkerja * row.workDays))) * (jumlahProduksibaru[index] || 0)
                                                     : 0;
                                                 const biayahiring = savedData.costs.biayaHiring;
                                                 return (
@@ -492,4 +493,4 @@ const AgregateResult = () => {
     );
 };
 
-export default AgregateResult;
+export default AgregateResultPure;

@@ -3,6 +3,7 @@ import { X, Plus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SendHorizontal, RotateCcw } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+
 interface ForecastColumn {
     id: number;
     name: string;
@@ -21,9 +22,9 @@ interface TooltipProps {
     text: string;
 }
 
-interface datakerja{
-    jamkerja:number;
-    tenagakerja:number;
+interface datakerja {
+    jamkerja: number;
+    tenagakerja: number;
 }
 
 const AgregateTable = () => {
@@ -31,6 +32,7 @@ const AgregateTable = () => {
     const [newColumnName, setNewColumnName] = useState('');
     const [selectedMonth, setSelectedMonth] = useState('');
     const [workDays, setWorkDays] = useState('');
+    const [overtime, setOvertime] = useState<number>(0);
     const [tableData, setTableData] = useState<TableRow[]>([]);
     const [initialStock, setInitialStock] = useState<number>();
     const [lot, setLot] = useState<number>();
@@ -58,13 +60,12 @@ const AgregateTable = () => {
     const [kapasitassubkontrak, setkapasitassubkontrak] = useState<number>(0);
     const [maxlostsale, setmaxlostsale] = useState<number>(0);
 
-
-
     //tooltip
     const [tooltipVisible, setTooltipVisible] = useState(false);
     const [tooltipText, setTooltipText] = useState('');
     const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
     const router = useRouter();
+
     const addColumn = () => {
         if (!newColumnName) return;
         setColumns([...columns, {
@@ -114,6 +115,7 @@ const AgregateTable = () => {
         }
         setForecastValue('');
     };
+
     const handleMouseEnter = (event: React.MouseEvent<HTMLDivElement>, text: string) => {
         setTooltipText(text);
         setTooltipPosition({
@@ -122,14 +124,13 @@ const AgregateTable = () => {
         });
         setTooltipVisible(true);
     };
+
     const handleMouseLeave = () => {
         setTooltipVisible(false);
     };
 
     const pushData = () => {
-
         const combinedData = {
-            // Column data with their properties
             columns: columns.map(column => ({
                 id: column.id,
                 name: column.name,
@@ -138,14 +139,12 @@ const AgregateTable = () => {
                 lot: column.lot
             })),
 
-            // Table data with forecasts and work days
             tableData: tableData.map(row => ({
                 month: row.month,
                 forecasts: row.forecasts,
                 workDays: row.workDays
             })),
 
-            // Cost data
             costs: {
                 biayaSubkontrak,
                 biayaLostsale,
@@ -160,12 +159,14 @@ const AgregateTable = () => {
             datakerja: {
                 tenagakerja,
                 jamkerja,
-            }
-        }
+            },
+            overtime // Menyimpan nilai overtime
+        };
+
         localStorage.setItem('agregatData', JSON.stringify(combinedData));
         console.log(combinedData);
         router.push('/dashboard/agregatrequirement/result');
-    }
+    };
 
     const Tooltip: React.FC<TooltipProps> = ({ text }) => (
         <div className="absolute bg-white border border-gray-300 rounded shadow-lg p-2 z-10">
@@ -286,6 +287,15 @@ const AgregateTable = () => {
                                     type="number"
                                     value={workDays}
                                     onChange={(e) => setWorkDays(e.target.value)}
+                                    className="w-full p-2 border rounded"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Jumlah Overtime (Dalam Persen)</label>
+                                <input
+                                    type="number"
+                                    value={overtime}
+                                    onChange={(e) => setOvertime(Number(e.target.value))}
                                     className="w-full p-2 border rounded"
                                 />
                             </div>
@@ -413,7 +423,7 @@ const AgregateTable = () => {
                                 <label className="block text-sm font-medium mb-1">Tenaga Kerja Awal</label>
                                 <input
                                     type="number"
-                                    value={tenagakerja}
+                                    value={tenagakerja ?? ""}
                                     onChange={(e) => settenagakerja(Number(e.target.value) || 0)}
                                     className="w-full p-2 border rounded"
                                 />
@@ -422,7 +432,7 @@ const AgregateTable = () => {
                                 <label className="block text-sm font-medium mb-1">Jam Kerja</label>
                                 <input
                                     type="number"
-                                    value={jamkerja}
+                                    value={jamkerja ?? ""}
                                     onChange={(e) => setjamkerja(Number(e.target.value) || 0)}
                                     className="w-full p-2 border rounded"
                                 />
