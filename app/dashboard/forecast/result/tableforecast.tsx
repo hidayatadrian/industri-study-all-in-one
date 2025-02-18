@@ -8,7 +8,7 @@ interface ForecastResult {
     dt: number; // Penjualan d(t)
     t2: number; // T²
     tdt: number; // T * d(t)
-    ft: number; // F(t)
+    ft: number; // F(t) 
     absEt: number; // ABS e(t)
     rsfe: number; // RSFE
     mad: number; // MAD
@@ -505,7 +505,7 @@ const ForecastResultsTable: React.FC<ForecastTableProps> = ({ }) => {
 
 
             <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-white p-4 rounded-lg shadow">
+                <div className="bg-white p-4 rounded-lgvalue shadow">
                     <h3 className="text-sm font-medium text-gray-500">Value of a</h3>
                     <p className="mt-2 text-lg font-semibold text-gray-900">
                         {a.toFixed(6)}

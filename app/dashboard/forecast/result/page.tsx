@@ -1,37 +1,60 @@
-'use client'
+'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import ForecastResultsTable from './tableforecast';
+import TableForecastTimeSeries from './tableforecasttimeseries';
+import WinterForecast from './winterforecast';
+import SingleMovingAverage from './singlemovingaverage'; // Import SMA
 
-interface MonthOption {
-    period: number;
-    month: string;
-    demand: string;
+interface ForecastData {
+    monthData: {
+        period: number;
+        month: string;
+        demand: string;
+    }[];
+    targetPeriod: number;
+    problemType: string;
+    forecastingType: string;
 }
 
 export default function ForecastResult() {
     const router = useRouter();
-    const [monthOptions, setMonthOptions] = useState<MonthOption[]>([]);
+    const [forecastData, setForecastData] = useState<ForecastData | null>(null);
 
     useEffect(() => {
-        // Mengambil data dari localStorage
         const savedData = localStorage.getItem('forecastData');
+
         if (savedData) {
-            setMonthOptions(JSON.parse(savedData));
+            setForecastData(JSON.parse(savedData) as ForecastData);
         } else {
-            // Jika tidak ada data, kembali ke halaman forecast
             router.push('/dashboard/forecast');
         }
     }, []);
 
-    if (monthOptions.length === 0) {
-        return <div className="flex items-center justify-center min-h-screen">
-            <div className="text-center">
-                <h2 className="text-xl font-semibold mb-2">Loading...</h2>
-                <p className="text-gray-600">Please wait while we process your data</p>
+    if (!forecastData) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="text-center">
+                    <h2 className="text-xl font-semibold mb-2">Loading...</h2>
+                    <p className="text-gray-600">Please wait while we process your data</p>
+                </div>
             </div>
-        </div>;
+        );
     }
+
+    const renderTable = () => {
+        if (forecastData.problemType === 'Time_Series_Forecasting') {
+            if (forecastData.forecastingType === 'Single Exponential Smoothing') {
+                return <TableForecastTimeSeries />;
+            } else if (forecastData.forecastingType === 'Winter Series') {
+                return <WinterForecast />;
+            } else if (forecastData.forecastingType === 'Single Moving Average') {
+                return <SingleMovingAverage />;
+            }
+        }
+
+        return <ForecastResultsTable monthOptions={forecastData.monthData} />;
+    };
 
     return (
         <div className="min-h-screen bg-gray-50 p-4">
@@ -46,7 +69,7 @@ export default function ForecastResult() {
                             Back to Forecast
                         </button>
                     </div>
-                    <ForecastResultsTable monthOptions={monthOptions} />
+                    {renderTable()}
                 </div>
             </div>
         </div>
