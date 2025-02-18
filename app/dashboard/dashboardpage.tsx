@@ -25,6 +25,7 @@ const Home: React.FC = () => {
         { label: "Aggregat Requirement", color: "bg-pink-600 hover:bg-pink-700", icon: LayoutDashboard },
         { label: "Material Requirement Planning", color: "bg-green-400 hover:bg-green-500", icon: Target },
         { label: "Perencanaan Kapasitas", color: "bg-yellow-400 hover:bg-yellow-500", icon: Users },
+        { label: "Flowshop Jobshop", color: "bg-yellow-500 hover:bg-yellow-500", icon: Users },
     ];
 
     const ChangePage = (label: string) => {
@@ -36,6 +37,9 @@ const Home: React.FC = () => {
         }
         if (label === "Material Requirement Planning") {
             router.push('/dashboard/MRP');
+        }
+        if (label === "Flowshop Jobshop") {
+            router.push('/dashboard/flowshop');
         }
     };
 
